@@ -5,12 +5,10 @@ from borrowings.serializers import BorrowingSerializer, BorrowingDetailSerialize
 
 
 class BorrowingListView(generics.ListAPIView):
-    queryset = Borrowing.objects.all()
+    queryset = Borrowing.objects.select_related("book")
     serializer_class = BorrowingSerializer
 
 
 class BorrowingRetrieveView(generics.RetrieveAPIView):
+    queryset = Borrowing.objects.select_related("book")
     serializer_class = BorrowingDetailSerializer
-
-    def get_object(self):
-        return Borrowing.objects.get(pk=self.kwargs["pk"])
