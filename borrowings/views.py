@@ -16,7 +16,20 @@ class BorrowingListView(generics.ListAPIView):
     def get_queryset(self):
         queryset = Borrowing.objects.select_related("book")
 
+        is_active = self.request.query_params.get("is_active")
+
+        if is_active == "True":
+            queryset = queryset.filter(actual_return_date__isnull=True)
+
+        if is_active == "False":
+            queryset = queryset.filter(actual_return_date__isnull=False)
+
         if self.request.user.is_staff:
+            user_id = self.request.query_params.get("user_id")
+
+            if user_id:
+                queryset = queryset.filter(user_id=user_id)
+
             return queryset
 
         return queryset.filter(user=self.request.user)
