@@ -39,11 +39,14 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
+    "debug_toolbar",
     "books",
     "users",
+    "borrowings",
 ]
 
 MIDDLEWARE = [
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -139,3 +142,9 @@ SIMPLE_JWT = {
     "ROTATE_REFRESH_TOKEN": True,
     "AUTH_HEADER_NAME": "HTTP_AUTHORIZE",
 }
+
+# INTERNAL_IPS
+INTERNAL_IPS = [
+    "127.0.0.1",
+    "localhost",
+]
