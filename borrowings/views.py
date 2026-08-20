@@ -1,5 +1,10 @@
-from rest_framework import generics
+from django.db import transaction
+from django.utils import timezone
+from rest_framework import generics, status
+from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from borrowings.models import Borrowing
 from borrowings.serializers import (
@@ -54,3 +59,27 @@ class BorrowingCreateView(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+
+class BorrowingReturnView(APIView):
+    def post(self, request, pk):
+        borrowing = get_object_or_404(Borrowing, pk=pk)
+
+        if borrowing.actual_return_date is not None:
+            return Response(
+                {"error": "This borrowing has already been returned."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        with transaction.atomic():
+            borrowing.actual_return_date = timezone.now().date()
+            borrowing.save()
+
+            book = borrowing.book
+            book.inventory += 1
+            book.save()
+
+        return Response(
+            {"message": "Book returned successfully."},
+            status=status.HTTP_200_OK,
+        )
