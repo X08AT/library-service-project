@@ -11,7 +11,7 @@ class BookReadSerializer(serializers.ModelSerializer):
 
 
 class BorrowingSerializer(serializers.ModelSerializer):
-    book = serializers.CharField(source="book.title")
+    book = serializers.CharField(source="book.title", read_only=True)
 
     class Meta:
         model = Borrowing
@@ -23,3 +23,7 @@ class BorrowingSerializer(serializers.ModelSerializer):
             "book",
             "user",
         )
+
+
+class BorrowingDetailSerializer(BorrowingSerializer):
+    book = BookReadSerializer(read_only=True)
