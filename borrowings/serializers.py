@@ -40,3 +40,10 @@ class BorrowingCreateSerializer(serializers.ModelSerializer):
             "book",
             "user",
         )
+
+    def validate(self, attrs):
+        if attrs["book"].inventory < 1:
+            raise serializers.ValidationError(
+                {"book": "No books left."}
+            )
+        return attrs
