@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "debug_toolbar",
+    "drf_spectacular",
     "books",
     "users",
     "borrowings",
@@ -83,12 +84,8 @@ WSGI_APPLICATION = "library_service_project.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.getenv("POSTGRES_DB"),
-        "USER": os.getenv("POSTGRES_USER"),
-        "PASSWORD": os.getenv("POSTGRES_PASSWORD"),
-        "HOST": os.getenv("POSTGRES_HOST"),
-        "PORT": os.getenv("POSTGRES_PORT"),
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
     }
 }
 
@@ -138,7 +135,8 @@ AUTH_USER_MODEL = "users.User"
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
-    )
+    ),
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
 # JWT
@@ -162,3 +160,10 @@ TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 # Celery
 CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL")
 CELERY_TIMEZONE = "Europe/Kyiv"
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Library Service Project",
+    "DESCRIPTION": "Online library service with books and borrowings.",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+}
