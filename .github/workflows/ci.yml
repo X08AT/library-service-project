@@ -16,24 +16,43 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.14"
-
-      - name: Install dependencies
+      - name: Create .env
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          cat > .env << EOF
+          DJANGO_SECRET_KEY=test-secret-key
+          DJANGO_DEBUG=False
+          DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
+
+          DATABASE_ENGINE=postgresql
+          DATABASE_NAME=library
+          DATABASE_USERNAME=postgres
+          DATABASE_PASSWORD=postgres
+          DATABASE_HOST=db
+          DATABASE_PORT=5432
+
+          POSTGRES_DB=library
+          POSTGRES_USER=postgres
+          POSTGRES_PASSWORD=postgres
+          EOF
+
+      - name: Build Docker image
+        run: docker compose build
+
+      - name: Start database
+        run: docker compose up -d db
 
       - name: Run Flake8
-        run: flake8 .
+        run: docker compose run --rm app flake8 .
 
       - name: Run Black
-        run: black --check .
+        run: docker compose run --rm app black --check .
 
       - name: Run migrations
-        run: python manage.py migrate
+        run: docker compose run --rm app python manage.py migrate
 
       - name: Run tests
-        run: python manage.py test
+        run: docker compose run --rm app python manage.py test
+
+      - name: Stop containers
+        if: always()
+        run: docker compose down -v
