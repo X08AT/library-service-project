@@ -1,4 +1,5 @@
 from datetime import timedelta
+from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
@@ -184,7 +185,8 @@ class AuthenticatedBorrowingApiTests(TestCase):
             status.HTTP_404_NOT_FOUND,
         )
 
-    def test_create_borrowing(self):
+    @patch("borrowings.serializers.send_telegram_message")
+    def test_create_borrowing(self, mock_send_telegram):
         book = sample_book()
 
         payload = {
@@ -209,6 +211,8 @@ class AuthenticatedBorrowingApiTests(TestCase):
         )
 
         self.assertEqual(borrowing.user, self.user)
+
+        mock_send_telegram.assert_called_once()
 
     def test_filter_active_borrowings(self):
         book = sample_book()

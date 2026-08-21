@@ -25,7 +25,7 @@ class BorrowingListView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        queryset = Borrowing.objects.select_related("book")
+        queryset = Borrowing.objects.select_related("book").order_by("id")
 
         is_active = self.request.query_params.get("is_active")
 
