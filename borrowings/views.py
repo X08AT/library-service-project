@@ -1,5 +1,6 @@
 from django.db import transaction
 from django.utils import timezone
+from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import generics, status
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
@@ -14,6 +15,11 @@ from borrowings.serializers import (
 )
 
 
+@extend_schema(
+    summary="List of Borrowings",
+    description="List of all borrowings of library.",
+    responses=BorrowingSerializer,
+)
 class BorrowingListView(generics.ListAPIView):
     serializer_class = BorrowingSerializer
     permission_classes = [IsAuthenticated]
@@ -40,6 +46,11 @@ class BorrowingListView(generics.ListAPIView):
         return queryset.filter(user=self.request.user)
 
 
+@extend_schema(
+    summary="Retrieve Borrowing",
+    description="Get details about borrowing",
+    responses=BorrowingDetailSerializer,
+)
 class BorrowingRetrieveView(generics.RetrieveAPIView):
     serializer_class = BorrowingDetailSerializer
     permission_classes = [IsAuthenticated]
@@ -53,6 +64,12 @@ class BorrowingRetrieveView(generics.RetrieveAPIView):
         return queryset.filter(user=self.request.user)
 
 
+@extend_schema(
+    summary="Create Borrowing",
+    description="Create a borrowing",
+    request=BorrowingCreateSerializer,
+    responses=BorrowingCreateSerializer,
+)
 class BorrowingCreateView(generics.CreateAPIView):
     serializer_class = BorrowingCreateSerializer
     permission_classes = [IsAuthenticated]
@@ -61,6 +78,17 @@ class BorrowingCreateView(generics.CreateAPIView):
         serializer.save(user=self.request.user)
 
 
+@extend_schema_view(
+    post=extend_schema(
+        summary="Return a borrowing",
+        description="Return book you borrowing.",
+        responses={
+            201: {"description": "Borrowing returned successfully."},
+            400: {"description": "You have already returned this borrowing."},
+            401: {"description": "Authentication required."},
+        },
+    )
+)
 class BorrowingReturnView(APIView):
     def post(self, request, pk):
         borrowing = get_object_or_404(Borrowing, pk=pk)
